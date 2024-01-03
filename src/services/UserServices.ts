@@ -144,7 +144,7 @@ export class UserServices {
 
         await user.save();
 
-        const verifyUrl = `http://localhost:5500/verify-email?token=${token}&id=${user?._id}`
+        const verifyUrl = `http://localhost:3001/verify-email?token=${token}&id=${user?._id}`
 
         await sendEmail(verifyUrl, user.email);
 
@@ -169,7 +169,7 @@ export class UserServices {
 
         const time = Date.now();
         if(time > user.verifyEmailTokenExpire){
-            data = new ResponseData("error", 400, "Your verification code has expired, pleae generate a new code to continue.", null);
+            data = new ResponseData("error", 400, "Your verification code has expired, please generate a new code to continue.", null);
             return data;
         }
 

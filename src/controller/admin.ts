@@ -169,3 +169,75 @@ export const getSingleCustomer = errorHandler(async(request: Request, response: 
     data = new ResponseData("success", 200, "Success", orders)
     return response.status(data.statusCode).json(data);
 });
+
+export const getRevenueGenerated = errorHandler(async (request: Request, response: Response) => {
+    let totalRevenue = 0;
+    const orders = await Order.find({status: 'PAYMENT COMPLETED'});
+    for(let key in orders){
+        const order = orders[key];
+        totalRevenue += order.amount;
+    }
+    const data = new ResponseData("success", 200, "Success", {revenue_generated: totalRevenue})
+    return response.status(data.statusCode).json(data);
+});
+
+export const getTopProducts = errorHandler(async (request: Request, response: Response) => {
+    const result = await Order.aggregate([
+        { $match: { status: 'PAYMENT COMPLETED' } },
+        { $unwind: '$products' },
+        { $group: { _id: '$products', count: { $sum: 1 } } }, 
+        { $sort: { count: -1 } }, 
+        { $limit: 3 }
+    ]);
+    
+    const topProducts = result.map((item) => {
+        return {
+            productId: item._id,
+            count: item.count
+        };
+    });
+    
+    const data = new ResponseData("success", 200, "Success", topProducts);
+    return response.status(data.statusCode).json(data);
+});
+
+export const getWorstProducts = errorHandler(async (Request: Request, response:Response) => {
+    const result = await Order.aggregate([
+        { $match: { status: 'PAYMENT COMPLETED' } },
+        { $unwind: '$products' },
+        { $group: { _id: '$products', count: { $sum: 1 } } },
+        { $limit: 3 }
+    ]);
+    
+    const worstProducts = result.map((item) => {
+        return {
+            productId: item._id,
+            count: item.count
+        };
+    });
+    
+    const data = new ResponseData("success", 200, "Success", worstProducts);
+    return response.status(data.statusCode).json(data);
+});
+
+export const getSaleReports = errorHandler(async (request: Request, response: Response) => {
+    const {query} = request.query;
+    let result;
+    if(query === "daily"){
+        const currentDate = new Date();
+        const startOfDay = new Date(currentDate.setHours(0, 0, 0, 0));
+        const endOfDay = new Date(currentDate.setHours(23, 59, 59, 999));
+
+        result = await Order.find({
+            createdAt: { $gte: startOfDay, $lte: endOfDay },
+        });
+    }else if(query === "weekly"){
+
+    }else if(query === "monthly"){
+
+    }else if(query === "yearly"){
+
+    }else{
+
+    }
+})

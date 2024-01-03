@@ -5,24 +5,22 @@ import { UserServices } from "../services/UserServices";
 export const signup = errorHandler(async(request: Request, response: Response) => {
     const data = await UserServices.registerUser(request.body);
 
+    response.cookie('token', data.data.token)
     return response.status(data.statusCode).json(data);
 });
 
 export const signin = errorHandler(async(request: Request, response: Response) => {
-    const data = await UserServices.loginUser(request.body);
-
+    const data = await UserServices.loginUser(request.body);    
     return response.status(data.statusCode).json(data);
 });
 
 export const signout = errorHandler(async (request: Request, response: Response) => {
     const data = await UserServices.logoutUser();
-
     return response.status(data.statusCode).json(data);
 });
 
 export const sendVerificationEmail = errorHandler(async(request: Request, response: Response) =>{
     const data = await UserServices.storeTokenForEmailVerification(request.body);
-
     return response.status(data.statusCode).json(data);
 });
 
