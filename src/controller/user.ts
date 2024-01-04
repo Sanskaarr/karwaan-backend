@@ -4,8 +4,6 @@ import { UserServices } from "../services/UserServices";
 
 export const signup = errorHandler(async(request: Request, response: Response) => {
     const data = await UserServices.registerUser(request.body);
-
-    response.cookie('token', data.data.token)
     return response.status(data.statusCode).json(data);
 });
 

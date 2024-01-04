@@ -94,7 +94,7 @@ export class UserServices {
             return data;
         }
 
-        const validatePassword = this.validatePassword(password, user?.password);
+        const validatePassword = await this.validatePassword(password, user?.password);
         if(!validatePassword){
             data = new ResponseData("error", 400, "Incorrect password, please enter correct password to continue", null);
 
@@ -134,7 +134,7 @@ export class UserServices {
             return data;
         }
 
-        const token = this.generateJWTToken(email);
+        const token = this.generateToken();
         const expire = this.getExpireTime();
 
         await user.updateOne({
@@ -204,7 +204,7 @@ export class UserServices {
             return data;
         }
 
-        const token = this.generateJWTToken(email);
+        const token = this.generateToken();
         const expire = this.getExpireTime();
 
         await user.updateOne({
@@ -311,7 +311,7 @@ export class UserServices {
             
                 await user?.save();
             
-                const token = this.generateJWTToken(email);
+                const token = this.generateToken();
                 const expire = this.getExpireTime();
             
                 await user.updateOne({
@@ -413,16 +413,16 @@ export class UserServices {
     }
 
     static async validatePassword(password: string, oldPassword: string){
-        return bcrypt.compare(password, oldPassword)
+        return await bcrypt.compare(password, oldPassword)
     }
 
     static generateJWTToken(payload: string){
         return jwt.sign(payload, process.env.JWT_SECRET as string);
     }
 
-    static generateToken (payload: string){
-        const token = crypto.createHash('sha256').update(payload)
-        return `${token}`;
+    static generateToken (){
+        const token = crypto.randomBytes(24).toString('hex');
+        return token;
     }
 
     static getExpireTime (){
