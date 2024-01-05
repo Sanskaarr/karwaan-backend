@@ -13,7 +13,11 @@ import { globalErrorHandler } from './middleware/globalErrorHandler';
 dotenv.config({path: './src/config/.env'});
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+const PORT = process.env.NODE_ENV === "development" ? 
+    process.env.PORT_DEVELOPMENT : process.env.PORT_PRODUCTION
+const HOST = process.env.NODE_ENV === "development" ? 
+    process.env.HOST_DEVELOPMENT : process.env.HOST_PRODUCTION
 
 initializeModel();
 
@@ -38,7 +42,7 @@ app.listen(PORT, async () => {
     try {
         app.use(Routes);
         app.use('*', globalErrorHandler);
-        Logger.info(`⚡Successfully connected to http://139.59.44.144:${PORT}`); 
+        Logger.info(`⚡Successfully connected to http://${HOST}:${PORT}`); 
         await connectDB();
     } catch (error: any) {
         Logger.error(error.message);

@@ -182,7 +182,8 @@ export class UserServices {
             isEmailValid: true,
             verifyEmailToken: null,
             verifyEmailTokenExpire: null
-        })
+        });
+        
         await user.save();
 
         data = new ResponseData("success", 200, "Your email has been verified", null);
