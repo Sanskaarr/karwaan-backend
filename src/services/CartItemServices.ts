@@ -7,8 +7,10 @@ import { Types } from "mongoose";
 import { OrderServices } from "./OrderServices";
 
 type AddItemToCartPayload = {
-    productId: string;
-    userId: string;
+    productId: Types.ObjectId;
+    userId: Types.ObjectId;
+    // productId: string;
+    // userId: string;
 }
 
 type RemoveItemFromCartPayload = {
@@ -22,16 +24,16 @@ export class CartItemServices {
 
         const {productId, userId} = payload;
 
-        const product = await Product.findById(productId);
+        const product = await Product.findById(productId); 
         if(!product){
-            data = new ResponseData("error", 400, "Product not found", null);
+            data = new ResponseData("error", 400, "Product not found ", null);
 
             return data;
         }
 
         const user = await User.findById(userId);
         if(!user){
-            data = new ResponseData("error", 400, "Product not found", null);
+            data = new ResponseData("error", 400, "User not found", null);
 
             return data;
         }

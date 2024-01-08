@@ -144,7 +144,7 @@ export class UserServices {
 
         await user.save();
 
-        const verifyUrl = `http://localhost:3001/verify-email?token=${token}&id=${user?._id}`
+        const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
 
         await sendEmail(verifyUrl, user.email);
 
@@ -215,7 +215,7 @@ export class UserServices {
         
         await user.save();
 
-        const verifyUrl = `http://localhost:5500/reset-password?token=${token}&id=${user?._id}`;
+        const verifyUrl = `http://localhost:3000/reset-password?token=${token}&id=${user?._id}`;
 
         await sendEmail(verifyUrl, email);
 
@@ -285,10 +285,14 @@ export class UserServices {
         try {
             let data;
             const {id, firstName, lastName, email, phoneNumber, image} = payload;
-            if(!firstName && !lastName && !email && !phoneNumber && !image){
+            if(!firstName && !lastName || !email || !phoneNumber || !image){
                 data = new ResponseData("error", 400, "Invalid payload", null);
                 return data;
             }
+            // if(!firstName && !lastName && !email && !phoneNumber && !image){
+            //     data = new ResponseData("error", 400, "Invalid payload", null);
+            //     return data;
+            // }
             const user = await User.findOneAndUpdate(
             {_id: id}, 
             {$set: {
@@ -322,7 +326,7 @@ export class UserServices {
 
                 await user.save();
             
-                const verifyUrl = `http://localhost:5500/verify-email?token=${token}&id=${user?._id}`
+                const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
             
                 await sendEmail(verifyUrl, user.email);
             

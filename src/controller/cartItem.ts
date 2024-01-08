@@ -15,7 +15,7 @@ export const removeItemFromCart = errorHandler(async (request: Request, response
     let data;
 
     if(!isObjectIdOrHexString(request.params.id)){
-        data = new ResponseData("error", 400, "Please enter a valid userId", null);
+        data = new ResponseData("error", 400, "Please enter a valid cartId", null);
         return response.status(data.statusCode).json(data);
     }
 
@@ -43,8 +43,8 @@ export const getAllCartItems = errorHandler(async (request: Request, response: R
 
 export const emptyCart = errorHandler(async (request: Request, response: Response) => {
     
-    const payload = {...request.params, ...request.body}
-    const data = await CartItemServices.addItemToCart(payload);
-
+    // const payload = {...request.params, ...request.body}
+    console.log("yash ka console",request.params )
+    const data = await CartItemServices.emptyCart(request.params.userId);
     return response.status(data.statusCode).json(data);
 });

@@ -96,7 +96,6 @@ export class OrderServices {
             updatedOrder = await Order.findByIdAndUpdate(order_id, {
                 $set: {status: 'PAYMENT FAILED'}},
                 {new: true});
-                
             return new ResponseData("success", 200, "Payment has failed", {order_details: updatedOrder});
         }
 
