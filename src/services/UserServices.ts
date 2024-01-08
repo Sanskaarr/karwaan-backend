@@ -418,7 +418,9 @@ export class UserServices {
     }
 
     static generateJWTToken(payload: string){
-        return jwt.sign(payload, process.env.JWT_SECRET as string);
+        return jwt.sign(payload, process.env.JWT_SECRET as string, {
+            expiresIn: 1000 * 60 * 60 * 24 * 5
+        });
     }
 
     static generateToken (){
