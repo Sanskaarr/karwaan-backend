@@ -19,9 +19,7 @@ export const removeItemFromCart = errorHandler(async (request: Request, response
         return response.status(data.statusCode).json(data);
     }
 
-    const cartItemId = new Types.ObjectId(request.params.id);
-
-    const payload = {cartItemId, ...request.body}
+    const payload = {cartItemId: request.params.id, ...request.body}
     data = await CartItemServices.removeItemFromCart(payload);
 
     return response.status(data.statusCode).json(data);
@@ -36,15 +34,13 @@ export const getAllCartItems = errorHandler(async (request: Request, response: R
     }
 
     const userId = new Types.ObjectId(request.params.id);
-
+    
     data = await CartItemServices.getAllCartItems(userId);
     return response.status(data.statusCode).json(data);
 });
 
 export const emptyCart = errorHandler(async (request: Request, response: Response) => {
-    
-    const payload = {...request.params, ...request.body}
-    const data = await CartItemServices.addItemToCart(payload);
-
+    const userId = new Types.ObjectId(request.params.id);
+    const data = await CartItemServices.emptyCart(userId);
     return response.status(data.statusCode).json(data);
 });

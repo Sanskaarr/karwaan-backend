@@ -13,7 +13,7 @@ type AddItemToCartPayload = {
 
 type RemoveItemFromCartPayload = {
     userId: string;
-    cartItemId: Types.ObjectId;
+    cartItemId: string;
 }
 
 export class CartItemServices {
@@ -63,7 +63,6 @@ export class CartItemServices {
             return data;
         }
 
-        
         const cartItem = await CartItem.findById(cartItemId);
         
         if(!cartItem){ 
@@ -120,26 +119,15 @@ export class CartItemServices {
         return data;
     }
 
-    static async emptyCart(payload: string){
+    static async emptyCart(payload: Types.ObjectId){
         let data;
-
         const user = await User.findById(payload);
         if(!user){
             data = new ResponseData("error", 400, "User not found", null);
             return data;
         }
 
-        const cartItems = await CartItem.find({userId: payload});
-        if(cartItems.length === 0){
-            data = new ResponseData("success", 200, "Your cart is already empty", null);
-            return data;
-        }
-
-        cartItems.map(async (cartItem) => {
-            await cartItem.deleteOne();
-            await cartItem.save();
-        });
-
+        const cartItems = await CartItem.deleteMany({userId: payload});
         data = new ResponseData("success", 200, "You cart is now empty", null);
         return data;
     }
