@@ -6,59 +6,56 @@ import { Types, isObjectIdOrHexString } from "mongoose";
 import { ResponseData } from "../utils/ResponseData";
 
 export const getAllProducts = errorHandler(async (request: Request, response: Response) => {
+    const { type, tag, q: searchQuery } = request.query;
     let data: ResponseData;
     let products;
 
-    const type = request.query.type as string;
-    const tag = request.query.tag as string;
-    const searchQuery = request.query.q as string;
-
-    if (type) {
+    const validateType = (type: string) => {
         if (type !== 'image' && type !== 'video') {
             data = new ResponseData("error", 400, `${type} is not a valid type`, null);
-            return response.status(data.statusCode).json(data);
+            response.status(data.statusCode).json(data);
         }
+    };
 
-        products = await Product.find({ 'media.type': type });
-        data = new ResponseData("success", 200, "Success", products);
-        return response.status(data.statusCode).json(data);
+    const validateTag = (tag: string) => {
+        const validTags = ['landscape', 'cityscape', 'dark', 'people', 'uncategorized'];
+        if (!validTags.includes(tag)) {
+            data = new ResponseData("error", 400, `${tag} is not a valid tag.`, null);
+            response.status(data.statusCode).json(data);
+        }
+    };
+
+    let query: Record<string, any> = {};
+
+    if (type) {
+        validateType(type as string);
+        query['media.type'] = type;
     }
 
     if (tag) {
-        const validTags = ['landscape', 'cityscape', 'dark', 'people', 'uncategorized'];
-
-        if (!validTags.includes(tag)) {
-            data = new ResponseData("error", 400, `${tag} is not a valid tag.`, null);
-            return response.status(data.statusCode).json(data);
-        }
-
-        products = await Product.find({ tags: { $in: [tag] } });
-        data = new ResponseData("success", 200, "Success", products);
-        return response.status(data.statusCode).json(data);
+        validateTag(tag as string);
+        query.tags = { $in: [tag] };
     }
 
     if (searchQuery) {
-            products = await Product.find({
-                $or: [
-                    { name: { $regex: searchQuery, $options: 'i' } },
-                    { description: { $regex: searchQuery, $options: 'i' } },
-                ]
-            });
+        query.$or = [
+            { name: { $regex: searchQuery, $options: 'i' } },
+            { description: { $regex: searchQuery, $options: 'i' } },
+        ];
+    }
 
-            data = new ResponseData("success", 200, "Success", products);
-            return response.status(data.statusCode).json(data);
-        }
+    products = await Product.find(query);
 
-    products = await Product.find();
     data = new ResponseData("success", 200, "Success", products);
-    return response.status(data.statusCode).json(data);
+    response.status(data.statusCode).json(data);
 });
 
 
-export const getSingleProduct= errorHandler(async (request: Request, response: Response) => {
+
+export const getSingleProduct = errorHandler(async (request: Request, response: Response) => {
     let data;
 
-    if(!isObjectIdOrHexString(request.params.id)){
+    if (!isObjectIdOrHexString(request.params.id)) {
         data = new ResponseData("error", 400, "Please upload a valid id", null);
         return response.status(data.statusCode).json(data);
     }

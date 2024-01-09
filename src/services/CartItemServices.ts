@@ -15,7 +15,7 @@ type AddItemToCartPayload = {
 
 type RemoveItemFromCartPayload = {
     userId: string;
-    cartItemId: Types.ObjectId;
+    cartItemId: string;
 }
 
 export class CartItemServices {
@@ -56,34 +56,40 @@ export class CartItemServices {
         return data;
     } 
 
-    static async removeItemFromCart (payload: RemoveItemFromCartPayload) {
-        let data;
-        const {userId, cartItemId} = payload;
+ static async removeItemFromCart(payload: RemoveItemFromCartPayload) {
+    let data;
+    const { userId, cartItemId } = payload;
+
+    try {
         const user = await User.findById(userId);
-        if(!user){
-            data = new ResponseData("error", 400, "User not found", null); 
+        if (!user) {
+            data = new ResponseData("error", 400, "User not found", null);
             return data;
         }
 
-        
         const cartItem = await CartItem.findById(cartItemId);
-        
-        if(!cartItem){ 
-            data = new ResponseData("error", 400, "Cart Item not found", null)
-            return data; 
+        if (!cartItem) {
+            data = new ResponseData("error", 400, "Cart Item not found", null);
+            return data;
         }
 
-        if(userId !== cartItem.userId.toString()){
-            data = new ResponseData("error", 400, "You cannot remove item from some one else's cart", null);
+        if (userId !== cartItem.userId.toString()) {
+            data = new ResponseData("error", 400, "You cannot remove an item from someone else's cart", null);
             return data;
         }
 
         await cartItem.deleteOne();
-        await cartItem.save();
 
-        data =  new ResponseData("success", 200, "Item removed from cart", null);
+        data = new ResponseData("success", 200, "Item removed from cart", { removedItem: cartItem });
+        return data;
+    } catch (error) {
+        console.error("Error removing item from cart:", error);
+        data = new ResponseData("error", 500, "Internal Server Error", null);
         return data;
     }
+}
+
+    
 
     static async getAllCartItems (payload: Types.ObjectId) {
         let data;
@@ -122,26 +128,15 @@ export class CartItemServices {
         return data;
     }
 
-    static async emptyCart(payload: string){
+    static async emptyCart(payload: Types.ObjectId){
         let data;
-
         const user = await User.findById(payload);
         if(!user){
             data = new ResponseData("error", 400, "User not found", null);
             return data;
         }
 
-        const cartItems = await CartItem.find({userId: payload});
-        if(cartItems.length === 0){
-            data = new ResponseData("success", 200, "Your cart is already empty", null);
-            return data;
-        }
-
-        cartItems.map(async (cartItem) => {
-            await cartItem.deleteOne();
-            await cartItem.save();
-        });
-
+        const cartItems = await CartItem.deleteMany({userId: payload});
         data = new ResponseData("success", 200, "You cart is now empty", null);
         return data;
     }

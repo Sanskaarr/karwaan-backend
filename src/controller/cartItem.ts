@@ -3,7 +3,7 @@ import { errorHandler } from "../middleware/errorHandler";
 import { CartItemServices } from "../services/CartItemServices";
 import { Types, isObjectIdOrHexString } from "mongoose";
 import { ResponseData } from "../utils/ResponseData";
-import {ObjectId} from 'mongoose';
+// import {ObjectId} from 'mongoose';
 
 export const addItemToCart = errorHandler(async (request: Request, response: Response) => {
     const data = await CartItemServices.addItemToCart(request.body);
@@ -15,13 +15,11 @@ export const removeItemFromCart = errorHandler(async (request: Request, response
     let data;
 
     if(!isObjectIdOrHexString(request.params.id)){
-        data = new ResponseData("error", 400, "Please enter a valid cartId", null);
+        data = new ResponseData("error", 400, "Please enter a valid userId", null);
         return response.status(data.statusCode).json(data);
     }
 
-    const cartItemId = new Types.ObjectId(request.params.id);
-
-    const payload = {cartItemId, ...request.body}
+    const payload = {cartItemId: request.params.id, ...request.body}
     data = await CartItemServices.removeItemFromCart(payload);
 
     return response.status(data.statusCode).json(data);
@@ -36,15 +34,13 @@ export const getAllCartItems = errorHandler(async (request: Request, response: R
     }
 
     const userId = new Types.ObjectId(request.params.id);
-
+    
     data = await CartItemServices.getAllCartItems(userId);
     return response.status(data.statusCode).json(data);
 });
 
 export const emptyCart = errorHandler(async (request: Request, response: Response) => {
-    
-    // const payload = {...request.params, ...request.body}
-    console.log("yash ka console",request.params )
-    const data = await CartItemServices.emptyCart(request.params.userId);
+    const userId = new Types.ObjectId(request.params.id);
+    const data = await CartItemServices.emptyCart(userId);
     return response.status(data.statusCode).json(data);
 });

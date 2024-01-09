@@ -236,6 +236,7 @@ export class UserServices {
             data = new ResponseData("error", 400, "Invalid user id", null);
             return data;
         }
+        
         const time = Date.now();
         if(time > user.passwordResetTokenExpiry){
             data = new ResponseData("error", 400, "Your token has expired, please generate another token to continue", null);
@@ -251,7 +252,7 @@ export class UserServices {
             data = new ResponseData("error", 400, "Password do not match, both passwords should be same.", null);
             return data;
         }
-        const hashPassword = this.hashPassword(newPassword);
+        const hashPassword = await this.hashPassword(newPassword);
 
         await user.updateOne({
             password: hashPassword,
@@ -285,14 +286,14 @@ export class UserServices {
         try {
             let data;
             const {id, firstName, lastName, email, phoneNumber, image} = payload;
-            if(!firstName && !lastName || !email || !phoneNumber || !image){
-                data = new ResponseData("error", 400, "Invalid payload", null);
-                return data;
-            }
-            // if(!firstName && !lastName && !email && !phoneNumber && !image){
+            // if(!firstName && !lastName || !email || !phoneNumber ){
             //     data = new ResponseData("error", 400, "Invalid payload", null);
             //     return data;
             // }
+            if(!firstName && !lastName && !email && !phoneNumber){
+                data = new ResponseData("error", 400, "Invalid payload", null);
+                return data;
+            }
             const user = await User.findOneAndUpdate(
             {_id: id}, 
             {$set: {
@@ -335,6 +336,7 @@ export class UserServices {
             }
         
             if(phoneNumber){
+              
                 await user?.updateOne({
                     isPhoneNumberValid: false
                 });

@@ -13,6 +13,6 @@ router.route('/:id').delete(verifyToken, removeItemFromCart)
 router
     .route('/:id')
     .get(verifyToken, getAllCartItems)
-    .delete(verifyToken, emptyCart);
 
+router.route('/empty-cart/:id').delete(verifyToken, emptyCart);
 export default router;
