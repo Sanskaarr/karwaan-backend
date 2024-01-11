@@ -7,8 +7,10 @@ import { Types } from "mongoose";
 import { OrderServices } from "./OrderServices";
 
 type AddItemToCartPayload = {
-    productId: string;
-    userId: string;
+    productId: Types.ObjectId;
+    userId: Types.ObjectId;
+    // productId: string;
+    // userId: string;
 }
 
 type RemoveItemFromCartPayload = {
@@ -22,16 +24,16 @@ export class CartItemServices {
 
         const {productId, userId} = payload;
 
-        const product = await Product.findById(productId);
+        const product = await Product.findById(productId); 
         if(!product){
-            data = new ResponseData("error", 400, "Product not found", null);
+            data = new ResponseData("error", 400, "Product not found ", null);
 
             return data;
         }
 
         const user = await User.findById(userId);
         if(!user){
-            data = new ResponseData("error", 400, "Product not found", null);
+            data = new ResponseData("error", 400, "User not found", null);
 
             return data;
         }
@@ -54,33 +56,40 @@ export class CartItemServices {
         return data;
     } 
 
-    static async removeItemFromCart (payload: RemoveItemFromCartPayload) {
-        let data;
-        const {userId, cartItemId} = payload;
+ static async removeItemFromCart(payload: RemoveItemFromCartPayload) {
+    let data;
+    const { userId, cartItemId } = payload;
+
+    try {
         const user = await User.findById(userId);
-        if(!user){
-            data = new ResponseData("error", 400, "User not found", null); 
+        if (!user) {
+            data = new ResponseData("error", 400, "User not found", null);
             return data;
         }
 
         const cartItem = await CartItem.findById(cartItemId);
-        
-        if(!cartItem){ 
-            data = new ResponseData("error", 400, "Cart Item not found", null)
-            return data; 
+        if (!cartItem) {
+            data = new ResponseData("error", 400, "Cart Item not found", null);
+            return data;
         }
 
-        if(userId !== cartItem.userId.toString()){
-            data = new ResponseData("error", 400, "You cannot remove item from some one else's cart", null);
+        if (userId !== cartItem.userId.toString()) {
+            data = new ResponseData("error", 400, "You cannot remove an item from someone else's cart", null);
             return data;
         }
 
         await cartItem.deleteOne();
-        await cartItem.save();
 
-        data =  new ResponseData("success", 200, "Item removed from cart", null);
+        data = new ResponseData("success", 200, "Item removed from cart", { removedItem: cartItem });
+        return data;
+    } catch (error) {
+        console.error("Error removing item from cart:", error);
+        data = new ResponseData("error", 500, "Internal Server Error", null);
         return data;
     }
+}
+
+    
 
     static async getAllCartItems (payload: Types.ObjectId) {
         let data;

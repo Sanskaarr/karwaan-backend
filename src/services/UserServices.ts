@@ -144,7 +144,7 @@ export class UserServices {
 
         await user.save();
 
-        const verifyUrl = `http://localhost:3001/verify-email?token=${token}&id=${user?._id}`
+        const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
 
         await sendEmail(verifyUrl, user.email);
 
@@ -215,7 +215,7 @@ export class UserServices {
         
         await user.save();
 
-        const verifyUrl = `http://localhost:5500/reset-password?token=${token}&id=${user?._id}`;
+        const verifyUrl = `http://localhost:3000/reset-password?token=${token}&id=${user?._id}`;
 
         await sendEmail(verifyUrl, email);
 
@@ -236,6 +236,7 @@ export class UserServices {
             data = new ResponseData("error", 400, "Invalid user id", null);
             return data;
         }
+        
         const time = Date.now();
         if(time > user.passwordResetTokenExpiry){
             data = new ResponseData("error", 400, "Your token has expired, please generate another token to continue", null);
@@ -251,7 +252,7 @@ export class UserServices {
             data = new ResponseData("error", 400, "Password do not match, both passwords should be same.", null);
             return data;
         }
-        const hashPassword = this.hashPassword(newPassword);
+        const hashPassword = await this.hashPassword(newPassword);
 
         await user.updateOne({
             password: hashPassword,
@@ -285,7 +286,11 @@ export class UserServices {
         try {
             let data;
             const {id, firstName, lastName, email, phoneNumber, image} = payload;
-            if(!firstName && !lastName && !email && !phoneNumber && !image){
+            // if(!firstName && !lastName || !email || !phoneNumber ){
+            //     data = new ResponseData("error", 400, "Invalid payload", null);
+            //     return data;
+            // }
+            if(!firstName && !lastName && !email && !phoneNumber){
                 data = new ResponseData("error", 400, "Invalid payload", null);
                 return data;
             }
@@ -307,7 +312,6 @@ export class UserServices {
         
             if(email){
                 await user?.updateOne({
-                    email: email,
                     isEmailValid: false,
                 });
             
@@ -323,7 +327,7 @@ export class UserServices {
 
                 await user.save();
             
-                const verifyUrl = `http://localhost:5500/verify-email?token=${token}&id=${user?._id}`
+                const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
             
                 await sendEmail(verifyUrl, user.email);
             
@@ -332,6 +336,7 @@ export class UserServices {
             }
         
             if(phoneNumber){
+              
                 await user?.updateOne({
                     isPhoneNumberValid: false
                 });
@@ -419,11 +424,7 @@ export class UserServices {
     }
 
     static generateJWTToken(payload: string){
-        return jwt.sign(payload, process.env.JWT_SECRET as string
-        //     ,{
-        //     expiresIn: Date.now() + (1000 * 60 * 60 * 24 * 5)
-        // }
-        );
+        return jwt.sign(payload, process.env.JWT_SECRET as string);
     }
 
     static generateToken (){

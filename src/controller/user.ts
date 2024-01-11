@@ -39,7 +39,7 @@ export const forgotPassword = errorHandler(async(request: Request, response: Res
 });
 
 export const resetPassword = errorHandler(async(request: Request, response: Response) =>{
-    const payload = {...request.params, ...request.body}
+    const payload = { ...request.body,...request.params}
     const data = await UserServices.resetPassword(payload);
     
     return response.status(data.statusCode).json(data);
@@ -66,7 +66,7 @@ export const deleteUser = errorHandler(async(request: Request, response: Respons
 });
 
 export const validateOtp = errorHandler(async(request: Request, response: Response) =>{
-    const data = await UserServices.validateOtp(request.body.otp, request.body.id);
+    const data = await UserServices.validateOtp(request.body.otp, request.params.id);
     return response.status(data.statusCode).json(data);
 });
 
@@ -101,7 +101,7 @@ export const updateEmail = errorHandler(async (request: Request, response: Respo
 
     await user.save();
 
-    const verifyUrl = `http://localhost:5500/verify-email?token=${token}&id=${user?._id}`
+    const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
 
     await sendEmail(verifyUrl, user.email);
 
