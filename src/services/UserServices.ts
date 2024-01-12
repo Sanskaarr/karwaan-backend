@@ -115,8 +115,20 @@ export class UserServices {
         return data;
     }
 
-    static async logoutUser() {
-        const data = new ResponseData("success", 200, "Logged out successfully", null); 
+    static async logoutUser(payload: string) {
+        let data
+        const token = payload;
+        if(!token){
+            return data = new ResponseData("error", 400, "Payload is missing", null);
+        }
+        const decodedToken = jwt.decode(token);
+        const user = await User.findOne({email: decodedToken}); 
+        
+        if(!user){
+            return data = new ResponseData("error", 400, "User not found", null);
+        }
+
+        data = new ResponseData("success", 200, "Logged out successfully", null); 
 
         return data;
     }
@@ -293,14 +305,14 @@ export class UserServices {
         try {
             let data;
             const {id, firstName, lastName, email, phoneNumber, image} = payload;
-            if(!firstName && !lastName || !email || !phoneNumber ){
-                data = new ResponseData("error", 400, "Invalid payload", null);
-                return data;
-            }
-            if(!firstName && !lastName && !email && !phoneNumber){
-                data = new ResponseData("error", 400, "Invalid payload", null);
-                return data;
-            }
+            // if(!firstName && !lastName || !email || !phoneNumber ){
+            //     data = new ResponseData("error", 400, "Invalid payload", null);
+            //     return data;
+            // }
+            // if(!firstName && !lastName && !email && !phoneNumber){
+            //     data = new ResponseData("error", 400, "Invalid payload", null);
+            //     return data;
+            // }
             const user = await User.findOneAndUpdate(
             {_id: id}, 
             {$set: {

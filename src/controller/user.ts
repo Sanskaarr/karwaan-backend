@@ -17,7 +17,7 @@ export const signin = errorHandler(async(request: Request, response: Response) =
 });
 
 export const signout = errorHandler(async (request: Request, response: Response) => {
-    const data = await UserServices.logoutUser();
+    const data = await UserServices.logoutUser(request.body.token);
     return response.status(data.statusCode).json(data);
 });
 
