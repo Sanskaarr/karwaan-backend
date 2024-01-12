@@ -70,43 +70,8 @@ export const validateOtp = errorHandler(async(request: Request, response: Respon
     return response.status(data.statusCode).json(data);
 });
 
-export const updateEmail = errorHandler(async (request: Request, response: Response) => {
-    let data;
-    const userId = new Types.ObjectId(request.params.id);
-    const {email} = request.body;
-    if(!email){
-        data = new ResponseData("error", 400, "Invalid payload", null);
-        return response.status(data.statusCode).json(data);
-    }
-    const user = await User.findById(userId);
-    if(!user){
-        data = new ResponseData("error", 400, "User not found", null);
-        return response.status(data.statusCode).json(data);
-    };
-
-    await user?.updateOne({
-        email: email,
-        isEmailValid: false,
-    });
-
-    await user?.save();
-
-    const token = UserServices.generateToken();
-    const expire = UserServices.getExpireTime();
-
-    await user.updateOne({
-        verifyEmailToken: token,
-        verifyEmailTokenExpire: expire
-    });
-
-    await user.save();
-
-    const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
-
-    await sendEmail(verifyUrl, user.email);
-
-    data = new ResponseData("success", 200, "An email has been sent for email verification.", user);
-    return data;
-
-
+export const changePassword = errorHandler(async (request: Request, response: Response) => {
+    const data = await UserServices.changePassword({...request.body, _id: request.params.id});
+    return response.status(data.statusCode).json(data);
 })
+

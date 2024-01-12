@@ -48,6 +48,13 @@ type SendPhoneNumberVerificationOTPPayload = {
     _id: string;
 }
 
+type ChangePasswordPayload = {
+    _id: string,
+    oldPassword: string,
+    newPassword: string,
+    confirmNewPassword: string;
+}
+
 export class UserServices {
     static async registerUser (payload: RegisterParam) {
         let data;
@@ -286,10 +293,10 @@ export class UserServices {
         try {
             let data;
             const {id, firstName, lastName, email, phoneNumber, image} = payload;
-            // if(!firstName && !lastName || !email || !phoneNumber ){
-            //     data = new ResponseData("error", 400, "Invalid payload", null);
-            //     return data;
-            // }
+            if(!firstName && !lastName || !email || !phoneNumber ){
+                data = new ResponseData("error", 400, "Invalid payload", null);
+                return data;
+            }
             if(!firstName && !lastName && !email && !phoneNumber){
                 data = new ResponseData("error", 400, "Invalid payload", null);
                 return data;
@@ -327,7 +334,7 @@ export class UserServices {
 
                 await user.save();
             
-                const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
+                const verifyUrl = `http://www.karwaanfilms.com/verify-email?token=${token}&id=${user?._id}`
             
                 await sendEmail(verifyUrl, user.email);
             
@@ -419,12 +426,44 @@ export class UserServices {
         }
     }
 
+    static changePassword = async (payload: ChangePasswordPayload) => {
+        const {oldPassword, newPassword, confirmNewPassword, _id} = payload
+        const user = await User.findById(_id);
+        if(!oldPassword || !newPassword || !confirmNewPassword || !_id){
+            return new ResponseData("error", 400, "Invalid payload", null);
+        }
+
+        if(!user){
+            return new ResponseData("error", 400, "User not found", null);
+        }
+
+        const validatePassword = await this.validatePassword(oldPassword, user.password);
+        if(!validatePassword){
+            return new ResponseData("error", 400, "Incorrect password, please enter correct password to continue", null);
+        }
+
+        if(newPassword !== confirmNewPassword){
+            return new ResponseData("error", 400, "Passwords do not match", null);
+        }
+
+        const hashPassword = this.hashPassword(newPassword);
+
+        await user.updateOne({
+            password: hashPassword,
+        })
+        await user.save()
+
+        return new ResponseData("success", 200, "Password updated successfully", null);
+    } 
+
     static async validatePassword(password: string, oldPassword: string){
         return await bcrypt.compare(password, oldPassword)
     }
 
     static generateJWTToken(payload: string){
-        return jwt.sign(payload, process.env.JWT_SECRET as string);
+        return jwt.sign({payload: payload}, process.env.JWT_SECRET as string, {
+            expiresIn: Date.now() + (1000 * 60 * 60 * 24 * 5),
+        });
     }
 
     static generateToken (){
