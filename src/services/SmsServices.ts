@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ResponseData } from "../utils/ResponseData";
 
 export class SmsServices {
     static async generateOTP(): Promise<number> {
@@ -24,7 +25,11 @@ export class SmsServices {
 
             const res = await axios(options);
             return res.data;
-        } catch (error) {
+        } catch (error: any) {
+            if(axios.isAxiosError(error)){
+                return new ResponseData("error", 400, error.response?.data.message, null);
+            }
+
             throw error;
         }
         
