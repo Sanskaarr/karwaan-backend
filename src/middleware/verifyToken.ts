@@ -11,12 +11,15 @@ export const verifyToken = (request: Request, response: Response, next: NextFunc
     return response.status(data.statusCode).json(data);
   }
   
-  jwt.verify(token, process.env.JWT_SECRET as string, (error, user) => {
-    if (error) {
+  jwt.verify(token, process.env.JWT_SECRET as string, () => {
+    try {
+      next();
+      return;
+    } catch (error: any) {
+      console.log(error);
+      next();
       data = new ResponseData("error", 403, error.message, null);
       return response.status(data.statusCode).json(data);
     }
-
-    next();
   });
 }

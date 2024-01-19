@@ -56,53 +56,55 @@ type ChangePasswordPayload = {
 }
 
 export class UserServices {
-    static async registerUser (payload: RegisterParam) {
-        let data;
+    static async registerUser(payload: RegisterParam) {
+        try {
+            const { firstName, lastName, email, password } = payload;
+            if (!firstName || !lastName || !email || !password) {
+                return new ResponseData("error", 400, "Invalid payload", null);
+            }
 
-        const {firstName, lastName, email, password} = payload;
-        if(!firstName || !lastName || !email || !password){
-            data = new ResponseData("error", 400, "Invalid payload", null);
-            return data;
+            console.log(payload);
+
+            const user = await User.findOne({ email: email });
+            if (user) {
+                return new ResponseData("error", 400, "Email is already registered, please try logging in.", null);
+            }
+
+            const hashedPassword = await this.hashPassword(password);
+            const token = this.generateJWTToken(email);
+
+            const newUser = await User.create({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: hashedPassword,
+            });
+
+            return new ResponseData("success", 200, "Signed up successfully", { user: newUser, token: token });
+        } catch (error) {
+            console.log("88", error)
+            throw error;
         }
-
-        const user = await User.findOne({email: email});
-        if(user){
-            data = new ResponseData("error", 400, "Email is already registered, please try logging in.", null);
-            return data;
-        }
-
-        const hashedPassword = await this.hashPassword(password);
-        const token = this.generateJWTToken(email);
-
-        const newUser = await User.create({
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            password: hashedPassword,
-        });
-
-        data = new ResponseData("success", 200, "Signed up successfully", {user: newUser, token: token});
-        return data;
     }
 
-    static async loginUser(payload: LoginParam){
+    static async loginUser(payload: LoginParam) {
         let data;
-        const {email, password} = payload;
-        if(!email || !password){
+        const { email, password } = payload;
+        if (!email || !password) {
             data = new ResponseData("error", 400, "Invalid payload", null);
 
             return data;
         }
 
-        const user = await User.findOne({email: email});
-        if(!user){
+        const user = await User.findOne({ email: email });
+        if (!user) {
             data = new ResponseData("error", 400, "This email is not registered, please sign up first", null);
 
             return data;
         }
 
         const validatePassword = await this.validatePassword(password, user?.password);
-        if(!validatePassword){
+        if (!validatePassword) {
             data = new ResponseData("error", 400, "Incorrect password, please enter correct password to continue", null);
 
             return data;
@@ -110,7 +112,7 @@ export class UserServices {
 
         const token = this.generateJWTToken(email);
 
-        data = new ResponseData("success", 200, "User signed in.", {user: user, token: token});
+        data = new ResponseData("success", 200, "User signed in.", { user: user, token: token });
 
         return data;
     }
@@ -118,36 +120,36 @@ export class UserServices {
     static async logoutUser(payload: string) {
         let data
         const token = payload;
-        if(!token){
+        if (!token) {
             return data = new ResponseData("error", 400, "Payload is missing", null);
         }
         const decodedToken = jwt.decode(token);
-        const user = await User.findOne({email: decodedToken}); 
-        
-        if(!user){
+        const user = await User.findOne({ email: decodedToken });
+
+        if (!user) {
             return data = new ResponseData("error", 400, "User not found", null);
         }
 
-        data = new ResponseData("success", 200, "Logged out successfully", null); 
+        data = new ResponseData("success", 200, "Logged out successfully", null);
 
         return data;
     }
 
-    static async hashPassword(password: string){
+    static async hashPassword(password: string) {
         const salt = await bcrypt.genSalt();
         return bcrypt.hash(password, salt);
     }
 
-    static async storeTokenForEmailVerification (payload: {email: string}) {
+    static async storeTokenForEmailVerification(payload: { email: string }) {
         let data;
-        const {email} = payload
-        if(!email){
+        const { email } = payload
+        if (!email) {
             data = new ResponseData("error", 400, "Invalid payload", null);
 
             return data;
         }
-        const user = await User.findOne({email: email});
-        if(!user){
+        const user = await User.findOne({ email: email });
+        if (!user) {
             data = new ResponseData("error", 400, "This email is not registered, please signup first", null)
 
             return data;
@@ -172,27 +174,27 @@ export class UserServices {
         return data;
     }
 
-    static async validateVerifyEmailToken (payload: VerifyEmailParam) {
+    static async validateVerifyEmailToken(payload: VerifyEmailParam) {
         let data;
-        const {token, _id} = payload;
-        if(!token || !_id){
+        const { token, _id } = payload;
+        if (!token || !_id) {
             data = new ResponseData("error", 400, "Invalid payload", null);
             return data;
         }
 
         const user = await User.findById(_id);
-        if(!user){
+        if (!user) {
             data = new ResponseData("error", 400, "Invalid user id", null);
             return data;
         }
 
         const time = Date.now();
-        if(time > user.verifyEmailTokenExpire){
+        if (time > user.verifyEmailTokenExpire) {
             data = new ResponseData("error", 400, "Your verification code has expired, please generate a new code to continue.", null);
             return data;
         }
 
-        if(token !== user.verifyEmailToken){
+        if (token !== user.verifyEmailToken) {
             data = new ResponseData("error", 400, "Invalid token, please enter correct token to continue", null)
             return data;
         }
@@ -202,24 +204,24 @@ export class UserServices {
             verifyEmailToken: null,
             verifyEmailTokenExpire: null
         });
-        
+
         await user.save();
 
         data = new ResponseData("success", 200, "Your email has been verified", null);
         return data;
     }
 
-    static async forgotPassword(payload: ForgotPasswordParam){
+    static async forgotPassword(payload: ForgotPasswordParam) {
         let data;
-        const {email} = payload;
+        const { email } = payload;
 
-        if(!email){
+        if (!email) {
             data = new ResponseData("error", 400, "Invalid payload", null);
             return data;
         }
 
-        const user = await User.findOne({email: email});
-        if(!user){
+        const user = await User.findOne({ email: email });
+        if (!user) {
             data = new ResponseData("error", 400, "This email is not registered, please signup first", null)
             return data;
         }
@@ -231,7 +233,7 @@ export class UserServices {
             passwordResetToken: token,
             passwordResetTokenExpiry: expire
         });
-        
+
         await user.save();
 
         const verifyUrl = `http://localhost:3000/reset-password?token=${token}&id=${user?._id}`;
@@ -242,32 +244,32 @@ export class UserServices {
         return data;
     }
 
-    static async resetPassword (payload: ResetPasswordParam) {
+    static async resetPassword(payload: ResetPasswordParam) {
         let data;
-        const {newPassword, confirmNewPassword, token, _id} = payload;
-        if(!newPassword || !confirmNewPassword || !token || !_id){
+        const { newPassword, confirmNewPassword, token, _id } = payload;
+        if (!newPassword || !confirmNewPassword || !token || !_id) {
             data = new ResponseData("error", 400, "Invalid payload", null);
             return data;
         }
 
         const user = await User.findById(_id);
-        if(!user){
+        if (!user) {
             data = new ResponseData("error", 400, "Invalid user id", null);
             return data;
         }
-        
+
         const time = Date.now();
-        if(time > user.passwordResetTokenExpiry){
+        if (time > user.passwordResetTokenExpiry) {
             data = new ResponseData("error", 400, "Your token has expired, please generate another token to continue", null);
             return data;
         }
 
-        if(token !== user?.passwordResetToken){
+        if (token !== user?.passwordResetToken) {
             data = new ResponseData("error", 400, "Invalid token, please enter correct token to continue", null);
             return data;
         }
 
-        if(newPassword !== confirmNewPassword){
+        if (newPassword !== confirmNewPassword) {
             data = new ResponseData("error", 400, "Password do not match, both passwords should be same.", null);
             return data;
         }
@@ -284,15 +286,15 @@ export class UserServices {
         return data;
     }
 
-    static async getUser (payload: string) {
+    static async getUser(payload: string) {
         let data;
-        if(!payload){
+        if (!payload) {
             data = new ResponseData("error", 400, "Invalid payload", null);
             return data;
         }
 
         const user = await User.findById(payload);
-        if(!user){
+        if (!user) {
             data = new ResponseData("error", 400, "Invalid user id", null);
             return data;
         }
@@ -300,11 +302,11 @@ export class UserServices {
         data = new ResponseData("success", 200, "Success", user)
         return data;
     }
-    
-    static async updateUser (payload: UpdateUserPayload) {
+
+    static async updateUser(payload: UpdateUserPayload) {
         try {
             let data;
-            const {id, firstName, lastName, email, phoneNumber, image} = payload;
+            const { id, firstName, lastName, email, phoneNumber, image } = payload;
             // if(!firstName && !lastName || !email || !phoneNumber ){
             //     data = new ResponseData("error", 400, "Invalid payload", null);
             //     return data;
@@ -314,56 +316,58 @@ export class UserServices {
             //     return data;
             // }
             const user = await User.findOneAndUpdate(
-            {_id: id}, 
-            {$set: {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                phoneNumber: phoneNumber,
-                image: image,
-                }}, 
-            {new: true});
+                { _id: id },
+                {
+                    $set: {
+                        firstName: firstName,
+                        lastName: lastName,
+                        email: email,
+                        phoneNumber: phoneNumber,
+                        image: image,
+                    }
+                },
+                { new: true });
 
-            if(!user){
+            if (!user) {
                 data = new ResponseData("error", 400, "Invalid user id", null);
                 return data;
             }
-        
-            if(email){
+
+            if (email) {
                 await user?.updateOne({
                     isEmailValid: false,
                 });
-            
+
                 await user?.save();
-            
+
                 const token = this.generateToken();
                 const expire = this.getExpireTime();
-            
+
                 await user.updateOne({
                     verifyEmailToken: token,
                     verifyEmailTokenExpire: expire
                 });
 
                 await user.save();
-            
+
                 const verifyUrl = `http://www.karwaanfilms.com/verify-email?token=${token}&id=${user?._id}`
-            
+
                 await sendEmail(verifyUrl, user.email);
-            
+
                 data = new ResponseData("success", 200, "An email has been sent for email verification.", user);
                 return data;
             }
-        
-            if(phoneNumber){
-              
+
+            if (phoneNumber) {
+
                 await user?.updateOne({
                     isPhoneNumberValid: false
                 });
-            
+
                 await user?.save();
 
                 const otp = await SmsServices.generateOTP();
-            
+
                 const sendOtp = await SmsServices.sendOtp(user?.phoneNumber, otp);
                 const expire = this.getExpireTime();
 
@@ -374,30 +378,30 @@ export class UserServices {
 
                 await user.save();
 
-                data = new ResponseData("success", 200, "An otp has been sent to your new phone number, please use that otp to verify your phone number.", {user: user, otp_data: sendOtp});
+                data = new ResponseData("success", 200, "An otp has been sent to your new phone number, please use that otp to verify your phone number.", { user: user, otp_data: sendOtp });
                 return data;
             }
-        
+
             data = new ResponseData("success", 200, "User updated successfully", user);
             return data;
         } catch (error) {
-             throw error;   
+            throw error;
         }
     }
 
     static validateOtp = async (payload: number, id: string) => {
-        const userLookup = await User.findOne({_id: id});
-        if(!userLookup) {
+        const userLookup = await User.findOne({ _id: id });
+        if (!userLookup) {
             return new ResponseData("error", 400, "User not found", null);
         }
 
-        if(userLookup.phoneNumberOTP !== payload){
+        if (userLookup.phoneNumberOTP !== payload) {
             return new ResponseData("error", 400, "OTP is incorrect", null);
         }
 
         const time = Date.now();
 
-        if(time > userLookup.phoneNumberOTPExpire){
+        if (time > userLookup.phoneNumberOTPExpire) {
             return new ResponseData("error", 400, "OTP has expired. Please try again.", null);
         }
 
@@ -411,10 +415,10 @@ export class UserServices {
         return new ResponseData("success", 200, "Your phone number is verified", null);
     }
 
-    static async deleteUser (payload: string) {
+    static async deleteUser(payload: string) {
         let data;
         const user = await User.findByIdAndDelete(payload)
-        if(!user){
+        if (!user) {
             data = new ResponseData("error", 400, "Invalid user id", null);
             return data;
         }
@@ -423,11 +427,11 @@ export class UserServices {
         return data;
     }
 
-    static async sendPhoneNumberVerificationOTP (payload: SendPhoneNumberVerificationOTPPayload) {
+    static async sendPhoneNumberVerificationOTP(payload: SendPhoneNumberVerificationOTPPayload) {
         try {
             let data;
-            const {_id} = payload;
-            if(!_id){
+            const { _id } = payload;
+            if (!_id) {
                 data = new ResponseData("error", 400, "Invalid payload", null);
                 return data;
             }
@@ -439,22 +443,22 @@ export class UserServices {
     }
 
     static changePassword = async (payload: ChangePasswordPayload) => {
-        const {oldPassword, newPassword, confirmNewPassword, _id} = payload
+        const { oldPassword, newPassword, confirmNewPassword, _id } = payload
         const user = await User.findById(_id);
-        if(!oldPassword || !newPassword || !confirmNewPassword || !_id){
+        if (!oldPassword || !newPassword || !confirmNewPassword || !_id) {
             return new ResponseData("error", 400, "Invalid payload", null);
         }
 
-        if(!user){
+        if (!user) {
             return new ResponseData("error", 400, "User not found", null);
         }
 
         const validatePassword = await this.validatePassword(oldPassword, user.password);
-        if(!validatePassword){
+        if (!validatePassword) {
             return new ResponseData("error", 400, "Incorrect password, please enter correct password to continue", null);
         }
 
-        if(newPassword !== confirmNewPassword){
+        if (newPassword !== confirmNewPassword) {
             return new ResponseData("error", 400, "Passwords do not match", null);
         }
 
@@ -466,24 +470,24 @@ export class UserServices {
         await user.save()
 
         return new ResponseData("success", 200, "Password updated successfully", null);
-    } 
+    }
 
-    static async validatePassword(password: string, oldPassword: string){
+    static async validatePassword(password: string, oldPassword: string) {
         return await bcrypt.compare(password, oldPassword)
     }
 
-    static generateJWTToken(payload: string){
-        return jwt.sign({payload: payload}, process.env.JWT_SECRET as string, {
+    static generateJWTToken(payload: string) {
+        return jwt.sign({ email: payload }, process.env.JWT_SECRET as string, {
             expiresIn: Date.now() + (1000 * 60 * 60 * 24 * 5),
         });
     }
 
-    static generateToken (){
+    static generateToken() {
         const token = crypto.randomBytes(24).toString('hex');
         return token;
     }
 
-    static getExpireTime (){
+    static getExpireTime() {
         return Date.now() + 1000 * 60 * 15;
     }
 }

@@ -13,30 +13,35 @@ export const verifyCredentials = async (request: Request, response: Response, ne
             return response.status(data.statusCode).json(data);
         }
 
-        jwt.verify(token, process.env.JWT_SECRET as string, async (error, userEmail) => {
-            if (error) {
-                data = new ResponseData("error", 403, error.message, null);
-                return response.status(data.statusCode).json(data);
-            }
-
-            const user = await User.findOne({ email: userEmail });
-
-            if (!user) {
-                data = new ResponseData("error", 403, "Unauthorized: Invalid token", null);
-                return response.status(data.statusCode).json(data);
+        jwt.verify(token, process.env.JWT_SECRET as string, async (error, userEmail: any) => {
+            try {
+                if (error) {
+                    data = new ResponseData("error", 403, error.message, null);
+                    return response.status(data.statusCode).json(data);
+                }
+    
+                const user = await User.findOne({ email: userEmail.payload });
+    
+                if (!user) {
+                    data = new ResponseData("error", 403, "Unauthorized: Invalid token", null);
+                    return response.status(data.statusCode).json(data);
+                }
+                
+                if(!user.isEmailValid){
+                    data = new ResponseData("error", 400, "Please verify your email before you continue.", null);
+                    return response.status(data.statusCode).json(data);
+                }
+    
+                if(!user.isPhoneNumberValid){
+                    data = new ResponseData("error", 400, "Please verify your phone number before you continue.", null);
+                    return response.status(data.statusCode).json(data);
+                }
+    
+                next();
+            } catch (error) {
+                throw error;
             }
             
-            if(!user.isEmailValid){
-                data = new ResponseData("error", 400, "Please verify your email before you continue.", null);
-                return response.status(data.statusCode).json(data);
-            }
-
-            if(!user.isPhoneNumberValid){
-                data = new ResponseData("error", 400, "Please verify your phone number before you continue.", null);
-                return response.status(data.statusCode).json(data);
-            }
-
-            next();
         });
     } catch (error) {
         next(error);

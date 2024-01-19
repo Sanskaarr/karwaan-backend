@@ -120,6 +120,33 @@ export const deleteProduct = errorHandler(async (request: Request, response: Res
     return response.status(data.statusCode).json(data);
 });
 
+export const getDashboardData = errorHandler(async (request : Request, response: Response) => {
+    const products = await Product.find();
+    const users = await User.find()
+    const orders = await Order.find({status: 'PAYMENT COMPELTE'});
+
+    let totalRevenue = 0;
+    let customersArray: string[] = [];
+    for(let key in orders){
+        const order = orders[key];
+        totalRevenue += order.amount;
+
+        if(!customersArray.includes(order.userId)){
+            customersArray.push(order.userId);
+        }
+    }
+    const responseObj = {
+        products_count: products.length,
+        users_count: users.length,
+        orders_count: orders.length,
+        total_revenue: totalRevenue,
+        customers_count: customersArray.length
+    }
+
+    const data = new ResponseData("success", 200, "Success", responseObj);
+    return response.status(data.statusCode).json(data);
+})
+
 export const getAllCustomer = errorHandler(async(request: Request, response: Response) => {
     const customers = await Order.aggregate([
         {$lookup: {
