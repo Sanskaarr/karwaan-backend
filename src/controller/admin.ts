@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, request } from "express";
 import { errorHandler } from "../middleware/errorHandler";
 import { ProductServices } from "../services/ProductServices";
 import Product from "../model/product";
@@ -117,6 +117,18 @@ export const deleteProduct = errorHandler(async (request: Request, response: Res
     const productId = new Types.ObjectId(request.params.id);
     const payload = {productId, ...request.body};
     data = await ProductServices.deleteProduct(payload);
+    return response.status(data.statusCode).json(data);
+});
+
+export const getAllUsers = errorHandler(async (request: Request, response: Response) => {
+    const users = await User.find();
+    const data = new ResponseData("success", 200, "Success", users);
+    return response.status(data.statusCode).json(data);
+});
+
+export const getAllAdmin = errorHandler(async (request: Request, response: Response) => {
+    const users = await User.find({role: "admin"});
+    const data = new ResponseData("success", 200, "Success", users);
     return response.status(data.statusCode).json(data);
 });
 
