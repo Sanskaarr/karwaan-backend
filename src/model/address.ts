@@ -9,7 +9,9 @@ interface AddressInterface {
     state: string,
     country: string,
     pin: string,
-};
+    createdAt: string;
+    updatedAt: string;
+}
 
 const AddressSchema = new mongoose.Schema({
     userId: {type: String, required: true},
