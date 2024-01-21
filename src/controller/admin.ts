@@ -224,14 +224,17 @@ export const getTopProducts = errorHandler(async (request: Request, response: Re
     const result = await Order.aggregate([
         { $match: { status: 'PAYMENT COMPLETED' } },
         { $unwind: '$products' },
-        { $group: { _id: '$products', count: { $sum: 1 } } }, 
+        { $group: { 
+            _id: '$products', 
+            count: { $sum: 1 } } 
+        }, 
         { $sort: { count: -1 } }, 
         { $limit: 3 }
     ]);
     
     const topProducts = result.map((item) => {
         return {
-            productId: item._id,
+            product: item,
             count: item.count
         };
     });
@@ -250,7 +253,7 @@ export const getWorstProducts = errorHandler(async (Request: Request, response:R
     
     const worstProducts = result.map((item) => {
         return {
-            productId: item._id,
+            productId: item,
             count: item.count
         };
     });
