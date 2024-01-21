@@ -5,6 +5,7 @@ import CartItem from './cartItem';
 import Order from './order';
 import Admin from './admin';
 import Test from './test';
+import Address from "./address";
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use('/api/v1/product', Product);
 router.use('/api/v1/cart-item', CartItem);
 router.use('/api/v1/order', Order);
 router.use('/api/v1/admin', Admin);
+router.use('/api/v1/address', Address);
 {/*
 *
 *

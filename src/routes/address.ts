@@ -8,8 +8,8 @@ const router = Router();
 router.route('/:id').post(verifyToken, addAddress);
 // THIS IS ADDRESS ID 
 router.route('/:id').put(verifyToken, updateAddress);
-router.route('/:id').put(verifyToken, getAddress);
-router.route('/:id').put(verifyToken, deleteAddress);
+router.route('/:id').get(verifyToken, getAddress);
+router.route('/:id').delete(verifyToken, deleteAddress);
 
 
 export default router;

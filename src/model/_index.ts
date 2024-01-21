@@ -1,4 +1,5 @@
 import ProductMetaData from './ProductMetaData';
+import Address from './address';
 import CartItem from './cartItem';
 import Order from './order';
 import Product from './product';
@@ -10,6 +11,7 @@ export const initializeModel = () => {
     new CartItem();
     new Order();
     new ProductMetaData();
+    new Address();
 
     return;
 }
