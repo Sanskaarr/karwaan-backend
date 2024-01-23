@@ -462,7 +462,7 @@ export class UserServices {
             return new ResponseData("error", 400, "Passwords do not match", null);
         }
 
-        const hashPassword = this.hashPassword(newPassword);
+        const hashPassword =await this.hashPassword(newPassword);
 
         await user.updateOne({
             password: hashPassword,
