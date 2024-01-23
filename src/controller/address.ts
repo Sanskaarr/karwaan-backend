@@ -7,8 +7,8 @@ import Address from "../model/address";
 export const addAddress = errorHandler(async (request: Request, response: Response) => {
     let data: ResponseData;
     const userId = request.params.id;
-    const {houseNumber, buildingName, street, city, state, pin} = request.body;
-    if(!houseNumber || !buildingName || !street || !city || !state || !pin){
+    const {houseNumber, buildingName, country, street, city, state, pin} = request.body;
+    if(!houseNumber || !buildingName ||!country || !street || !city || !state || !pin){
         data = new ResponseData("error", 400, "Invalid payload", null);
         return response.status(data.statusCode).json(data);
     }
@@ -21,6 +21,7 @@ export const addAddress = errorHandler(async (request: Request, response: Respon
         userId: userId,
         houseNumber: houseNumber,
         buildingName: buildingName,
+        country:country,
         street: street,
         city: city,
         state: state,
@@ -82,7 +83,7 @@ export const deleteAddress = errorHandler(async (request :Request, response: Res
         return response.status(data.statusCode).json(data);
     }
     await address.deleteOne();
-    await address.save();
+    // await address.save();
     data = new ResponseData("success", 200, "Address deleted successfully", null);
     return response.status(data.statusCode).json(data);
 })
