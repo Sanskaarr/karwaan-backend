@@ -20,7 +20,7 @@ export const verifyCredentials = async (request: Request, response: Response, ne
                     return response.status(data.statusCode).json(data);
                 }
     
-                const user = await User.findOne({ email: userEmail.payload });
+                const user = await User.findOne({ email: userEmail.email });
     
                 if (!user) {
                     data = new ResponseData("error", 403, "Unauthorized: Invalid token", null);

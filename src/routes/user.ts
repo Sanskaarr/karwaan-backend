@@ -8,7 +8,7 @@ router.route('/signup').post(signup);
 router.route('/signin').post(signin);
 router.route('/signout').post(verifyToken, signout);
 router.route('/send-verification-email').post(verifyToken, sendVerificationEmail);
-router.route('/verify-email').post(verifyToken, verifyEmail);
+router.route('/verify-email').post(verifyEmail);
 router.route('/forgot-password').post(forgotPassword);
 router.route('/reset-password/:token').put(resetPassword);
 router
