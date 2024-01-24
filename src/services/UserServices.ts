@@ -165,7 +165,7 @@ export class UserServices {
 
         await user.save();
 
-        const verifyUrl = `https://karwaanfilms.com/verify-email?token=${token}&id=${user?._id}`
+        const verifyUrl = `https://www.karwaanfilms.com/verify-email?token=${token}&id=${user?._id}`
 
         await sendEmail(verifyUrl, user.email);
 
