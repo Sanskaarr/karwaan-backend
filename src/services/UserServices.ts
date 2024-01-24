@@ -165,7 +165,7 @@ export class UserServices {
 
         await user.save();
 
-        const verifyUrl = `http://localhost:3000/verify-email?token=${token}&id=${user?._id}`
+        const verifyUrl = `https://www.karwaanfilms.com/verify-email?token=${token}&id=${user?._id}`
 
         await sendEmail(verifyUrl, user.email);
 
@@ -236,7 +236,7 @@ export class UserServices {
 
         await user.save();
 
-        const verifyUrl = `http://localhost:3000/reset-password?token=${token}&id=${user?._id}`;
+        const verifyUrl = `https://www.karwaanfilms.com/reset-password?token=${token}&id=${user?._id}`;
 
         await sendEmail(verifyUrl, email);
 
