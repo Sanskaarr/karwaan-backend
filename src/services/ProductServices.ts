@@ -36,7 +36,7 @@ export class ProductServices {
         const product = await Product.findById(payload);
 
         if(!product){
-            return new ResponseData("error", 400, "Prodcut not found", null);
+            return new ResponseData("error", 400, "Product not found", null);
         }
         
         return new ResponseData("success", 200, "Success", product);
@@ -70,7 +70,7 @@ export class ProductServices {
         }}, {new: true});
 
         if(!product){
-            return new ResponseData("error", 400, "Prodcut not found", null);
+            return new ResponseData("error", 400, "Product not found", null);
         }
         
         return new ResponseData("success", 200, "Success", product);
@@ -96,7 +96,7 @@ export class ProductServices {
         }
 
         if(!product){
-            return new ResponseData("error", 400, "Prodcut not found", null);
+            return new ResponseData("error", 400, "Product not found", null);
         }
         
         return new ResponseData("success", 200, "Success", null);
