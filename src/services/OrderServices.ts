@@ -1,4 +1,5 @@
 import ProductMetaData from "../model/ProductMetaData";
+import CartItem from "../model/cartItem";
 import Order from "../model/order";
 import Product, { ProductInterface } from "../model/product";
 import User from "../model/user";
@@ -90,6 +91,8 @@ export class OrderServices {
                 const productMetaData = await ProductMetaData.findOne({productId: productId});
                 productMetadatas = [...productMetadatas, productMetaData];
             });
+
+            await CartItem.deleteMany({userId: order?.userId});
 
             return new ResponseData("success", 200, "Success", {order_details: updatedOrder, product_metadata: productMetadatas});
         }else{
