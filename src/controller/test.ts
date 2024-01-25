@@ -26,6 +26,6 @@ export const deleteDatabase = errorHandler(async (request: Request, response: Re
     await Address.deleteMany();
     await ProductMetaData.deleteMany();
 
-    const data = new ResponseData("success", 200, "You database is now clear", null);
+    const data = new ResponseData("success", 200, "Your database is now clear", null);
     return response.status(data.statusCode).json(data);
 })
