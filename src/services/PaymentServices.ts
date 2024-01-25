@@ -40,7 +40,7 @@ export class PaymentServices {
                     email: true
                 },
                 reminder_enable: true,
-                callback_url: `http://localhost:3000/order/payment_status/${order_id}`,
+                callback_url: `https://www.karwaanfilms.com/order/payment_status/${order_id}`,
                 callback_method: "get"
             }).catch((error) => {
                 console.log(error);
