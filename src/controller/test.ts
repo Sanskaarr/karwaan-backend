@@ -5,6 +5,8 @@ import Product from "../model/product";
 import Order from "../model/order";
 import CartItem from "../model/cartItem";
 import { ResponseData } from "../utils/ResponseData";
+import Address from "../model/address";
+import ProductMetaData from "../model/ProductMetaData";
 
 {/*
 *
@@ -21,6 +23,8 @@ export const deleteDatabase = errorHandler(async (request: Request, response: Re
     await Product.deleteMany();
     await Order.deleteMany();
     await CartItem.deleteMany();
+    await Address.deleteMany();
+    await ProductMetaData.deleteMany();
 
     const data = new ResponseData("success", 200, "You database is now clear", null);
     return response.status(data.statusCode).json(data);

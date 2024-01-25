@@ -366,7 +366,7 @@ export class UserServices {
             if (phoneNumber) {
                 const userLookup = await User.findOne({phoneNumber: phoneNumber})
                 if(userLookup){
-                    return new ResponseData("error", 400, "Email is already registered", null);
+                    return new ResponseData("error", 400, "Phone number is already registered", null);
                 }
 
                 await user?.updateOne({
