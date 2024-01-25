@@ -31,8 +31,8 @@ export class OrderServices {
         }
 
         let totalAmount = 0;
-        for(let productId in products){
-            const product = await Product.findById(products[productId]);
+        for(let productId of products){
+            const product = await Product.findById(productId);
             
             if(!product){
                 return new ResponseData("error", 400, "Product not found", null);
