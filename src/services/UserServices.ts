@@ -63,8 +63,6 @@ export class UserServices {
                 return new ResponseData("error", 400, "Invalid payload", null);
             }
 
-            console.log(payload);
-
             const user = await User.findOne({ email: email });
             if (user) {
                 return new ResponseData("error", 400, "Email is already registered, please try logging in.", null);
@@ -82,7 +80,6 @@ export class UserServices {
 
             return new ResponseData("success", 200, "Signed up successfully", { user: newUser, token: token });
         } catch (error) {
-            console.log("88", error)
             throw error;
         }
     }

@@ -16,7 +16,6 @@ export const verifyToken = (request: Request, response: Response, next: NextFunc
       next();
       return;
     } catch (error: any) {
-      console.log(error);
       next();
       data = new ResponseData("error", 403, error.message, null);
       return response.status(data.statusCode).json(data);
