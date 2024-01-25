@@ -25,6 +25,6 @@ export const getAllOrders = errorHandler(async (request: Request, response: Resp
     }
     
     const orders = await Order.find({userId: userId, status:"PAYMENT COMPLETED"});
-    data = new ResponseData("success", 400, "Success", orders);
+    data = new ResponseData("success", 200, "Success", orders);
     return response.status(data.statusCode).json(data);
 })
