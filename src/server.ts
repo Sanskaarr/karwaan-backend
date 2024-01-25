@@ -24,7 +24,11 @@ initializeModel();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(fileUpload());
-app.use(cors());
+app.use(cors({
+    origin: ['https://www.karwaanfilms.com', 'https://karwaan-admin-pannel.vercel.app'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 export const s3 = new AWS.S3({
     endpoint: process.env.DIGITAL_OCEAN_BUCKET_ENDPOINT!,
