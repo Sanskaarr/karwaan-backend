@@ -14,10 +14,11 @@ dotenv.config({path: './src/config/.env'});
 
 const app = express();
 
-app.use(cors({
+app.use( '*',cors({
     origin: ['https://www.karwaanfilms.com', 'https://karwaan-admin-pannel.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
 }));
 
 const PORT = process.env.NODE_ENV === "development" ? 
