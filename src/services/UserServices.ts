@@ -334,6 +334,11 @@ export class UserServices {
             }
 
             if (email) {
+                const userLookup = await User.findOne({email: email})
+                if(userLookup){
+                    return new ResponseData("error", 400, "Email is already registered", null);
+                }
+
                 await user?.updateOne({
                     isEmailValid: false,
                 });
@@ -359,6 +364,10 @@ export class UserServices {
             }
 
             if (phoneNumber) {
+                const userLookup = await User.findOne({phoneNumber: phoneNumber})
+                if(userLookup){
+                    return new ResponseData("error", 400, "Email is already registered", null);
+                }
 
                 await user?.updateOne({
                     isPhoneNumberValid: false
