@@ -14,6 +14,12 @@ dotenv.config({path: './src/config/.env'});
 
 const app = express();
 
+app.use(cors({
+    origin: ['https://www.karwaanfilms.com', 'https://karwaan-admin-pannel.vercel.app'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 const PORT = process.env.NODE_ENV === "development" ? 
     process.env.PORT_DEVELOPMENT : process.env.PORT_PRODUCTION
 const HOST = process.env.NODE_ENV === "development" ? 
@@ -24,11 +30,6 @@ initializeModel();
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(fileUpload());
-app.use(cors({
-    origin: ['https://www.karwaanfilms.com', 'https://karwaan-admin-pannel.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
 
 export const s3 = new AWS.S3({
     endpoint: process.env.DIGITAL_OCEAN_BUCKET_ENDPOINT!,
